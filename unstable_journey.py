@@ -1058,6 +1058,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def httpsChanged(self, state):
         if Qt.CheckState(state) == Qt.CheckState.Checked:
             self.use_https = True 
+        else:
+            self.use_https = False
         self.api = webuiapi.WebUIApi(host=self.hostLineEdit.text(), port=int(self.portLineEdit.text()), use_https=self.use_https)
         self.cn_interface = webuiapi.ControlNetInterface(self.api)
         
