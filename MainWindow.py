@@ -16,11 +16,12 @@ from PySide6.QtGui import (QAction, QBrush, QColor, QConicalGradient,
     QIcon, QImage, QKeySequence, QLinearGradient,
     QPainter, QPalette, QPixmap, QRadialGradient,
     QTransform)
-from PySide6.QtWidgets import (QApplication, QComboBox, QDoubleSpinBox, QGridLayout,
-    QHBoxLayout, QLabel, QLayout, QLineEdit,
-    QMainWindow, QMenu, QMenuBar, QPushButton,
-    QSizePolicy, QSpacerItem, QSpinBox, QStatusBar,
-    QTextEdit, QToolBar, QVBoxLayout, QWidget)
+from PySide6.QtWidgets import (QApplication, QCheckBox, QComboBox, QDoubleSpinBox,
+    QGridLayout, QHBoxLayout, QLabel, QLayout,
+    QLineEdit, QMainWindow, QMenu, QMenuBar,
+    QPushButton, QSizePolicy, QSpacerItem, QSpinBox,
+    QStatusBar, QTextEdit, QToolBar, QVBoxLayout,
+    QWidget)
 import resources_rc
 
 class Ui_MainWindow(object):
@@ -818,6 +819,11 @@ class Ui_MainWindow(object):
 
         self.horizontalLayout_14.addWidget(self.portLineEdit)
 
+        self.httpsCheckBox = QCheckBox(self.centralWidget)
+        self.httpsCheckBox.setObjectName(u"httpsCheckBox")
+
+        self.horizontalLayout_14.addWidget(self.httpsCheckBox)
+
         self.horizontalSpacer = QSpacerItem(40, 20, QSizePolicy.Expanding, QSizePolicy.Minimum)
 
         self.horizontalLayout_14.addItem(self.horizontalSpacer)
@@ -855,7 +861,7 @@ class Ui_MainWindow(object):
         self.drawingToolbar.setObjectName(u"drawingToolbar")
         sizePolicy2.setHeightForWidth(self.drawingToolbar.sizePolicy().hasHeightForWidth())
         self.drawingToolbar.setSizePolicy(sizePolicy2)
-        self.drawingToolbar.setMinimumSize(QSize(100, 0))
+        self.drawingToolbar.setMinimumSize(QSize(0, 0))
         self.drawingToolbar.setMaximumSize(QSize(200, 16777215))
         self.drawingToolbar.setIconSize(QSize(16, 16))
         MainWindow.addToolBar(Qt.TopToolBarArea, self.drawingToolbar)
@@ -987,6 +993,7 @@ class Ui_MainWindow(object):
         self.hostLineEdit.setText(QCoreApplication.translate("MainWindow", u"localhost", None))
         self.portLabel.setText(QCoreApplication.translate("MainWindow", u"Port:", None))
         self.portLineEdit.setText(QCoreApplication.translate("MainWindow", u"7860", None))
+        self.httpsCheckBox.setText(QCoreApplication.translate("MainWindow", u"use HTTPS?", None))
         self.helpPushButton.setText(QCoreApplication.translate("MainWindow", u"Help !", None))
         self.menuFIle.setTitle(QCoreApplication.translate("MainWindow", u"FIle", None))
         self.menuEdit.setTitle(QCoreApplication.translate("MainWindow", u"Edit", None))

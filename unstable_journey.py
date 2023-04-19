@@ -800,8 +800,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self, *args, **kwargs):
 
         # create API client with custom host, port
-
-        self.api = webuiapi.WebUIApi(host='5.12.10.72', port=50026)
+        self.use_https = False
+        self.api = webuiapi.WebUIApi(host='localhost', port=7860, use_https=self.use_https)
         self.cn_interface = webuiapi.ControlNetInterface(self.api)
         #print(self.cn_interface.model_list())
         #self.api.set_auth('test', 'test123')
@@ -888,6 +888,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.hostLineEdit.textChanged.connect(self.hostOrPortChanged)
         self.portLineEdit.textChanged.connect(self.hostOrPortChanged)
+
+        self.httpsCheckBox.stateChanged.connect(self.httpsChanged)
 
         # Setup the color selection buttons.
         self.primaryButton.pressed.connect(lambda: self.choose_color(self.set_primary_color))
@@ -1050,10 +1052,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         seedLineEdit.setText(str(random.randint(0, sys.maxsize)))
 
     def hostOrPortChanged(self):
-        self.api = webuiapi.WebUIApi(host=self.hostLineEdit.text(), port=int(self.portLineEdit.text()))
+        self.api = webuiapi.WebUIApi(host=self.hostLineEdit.text(), port=int(self.portLineEdit.text()), use_https=self.use_https)
         self.cn_interface = webuiapi.ControlNetInterface(self.api)
 
-
+    def httpsChanged(self, state):
+        if Qt.CheckState(state) == Qt.CheckState.Checked:
+            self.use_https = True 
+        self.api = webuiapi.WebUIApi(host=self.hostLineEdit.text(), port=int(self.portLineEdit.text()), use_https=self.use_https)
+        self.cn_interface = webuiapi.ControlNetInterface(self.api)
+        
 
     def showHelp(self):
         msg = QMessageBox()
@@ -1069,13 +1076,15 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         </style></head><body style=" font-family:'.AppleSystemUIFont'; font-size:13pt; font-weight:400; font-style:normal;">
         <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Remember to start <a href="https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Install-and-Run-on-NVidia-GPUs"><span style=" text-decoration: underline; color:#094fd1;">automatic1111 webui</span></a> with the <span style=" font-weight:700;">--api </span><a href="https://github.com/AUTOMATIC1111/stable-diffusion-webui/wiki/Command-Line-Arguments-and-Settings#webui-user"><span style=" text-decoration: underline; color:#094fd1;">COMMANDLINE_ARGS</span></a> in order to allow this application to work correctly. If the host is not your computer (friend with nice GPU or server), you can also add the <span style=" font-weight:700;">--listen </span>parameter (webui-user.bat or .sh).</p>
         <p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><br /></p>
-        <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">If you use ControlNet (CN), there's a bug in latest version, if it's not fixed yet, you will have to switch to a previous commit <span style=" text-decoration: underline;">from the extension folder</span> executing the following commands: <span style=" font-weight:700;">git checkout</span> <span style=" font-family:'Helvetica Neue'; font-weight:700;">c5403ce </span><span style=" font-family:'Helvetica Neue';">(c5403ced564e1042dcf2cf4acdd0967373b14343 hash). </span></p>
-        <p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Helvetica Neue';"><br /></p>
-        <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'Helvetica Neue';">Just in case, the latest automatic1111 commit working with this application is 22bcc7 (22bcc7be428c94e9408f589966c2040187245d81).</span></p>
-        <p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Helvetica Neue';"><br /></p>
-        <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">You should also update <span style=" color:#ff2600;">this</span> project using <span style=" font-weight:700;">git pull </span>when updates are rolled out.</p>
-        <p style="-qt-paragraph-type:empty; margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px; font-family:'Helvetica Neue';"><br /></p>
-        <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">If you would like to contribute or ask questions, reach out on <a href="https://discord.gg/9wKuxN7aaq"><span style=" text-decoration: underline; color:#094fd1;">Discord</span></a></p></body></html>
+        <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">Enable HTTPS if using gradio URL (using --share instead of --listen gives you a gradio https URL).        </p>
+        <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">        </p>
+        <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">If you use ControlNet (CN), there's a bug in latest version, if it's not fixed yet, you will have to switch to a previous commit <span style=" text-decoration: underline;">from the extension folder</span> executing the following commands: <span style=" font-weight:700;">git checkout</span> <span style=" font-family:'Helvetica Neue'; font-weight:700;">c5403ce </span><span style=" font-family:'Helvetica Neue';">(c5403ced564e1042dcf2cf4acdd0967373b14343 hash). </span>        </p>
+        <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">        </p>
+        <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;"><span style=" font-family:'Helvetica Neue';">Just in case, the latest automatic1111 commit working with this application is 22bcc7 (22bcc7be428c94e9408f589966c2040187245d81).</span>        </p>
+        <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">        </p>
+        <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">You should also update <span style=" color:#ff2600;">this</span> project using <span style=" font-weight:700;">git pull </span>when updates are rolled out.        </p>
+        <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">        </p>
+        <p style=" margin-top:0px; margin-bottom:0px; margin-left:0px; margin-right:0px; -qt-block-indent:0; text-indent:0px;">If you would like to contribute or ask questions, reach out on <a href="https://discord.gg/9wKuxN7aaq"><span style=" text-decoration: underline; color:#094fd1;">Discord</span></a>        </p></body></html>
         """)
         msg.setWindowTitle("Help")
         msg.exec()

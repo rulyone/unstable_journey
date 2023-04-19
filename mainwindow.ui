@@ -1640,7 +1640,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
      </layout>
     </item>
     <item>
-     <layout class="QHBoxLayout" name="horizontalLayout_14" stretch="0,0,0,0,0,0">
+     <layout class="QHBoxLayout" name="horizontalLayout_14" stretch="0,0,0,0,0,0,0">
       <property name="sizeConstraint">
        <enum>QLayout::SetDefaultConstraint</enum>
       </property>
@@ -1687,6 +1687,13 @@ li.checked::marker { content: &quot;\2612&quot;; }
         </property>
         <property name="text">
          <string>7860</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QCheckBox" name="httpsCheckBox">
+        <property name="text">
+         <string>use HTTPS?</string>
         </property>
        </widget>
       </item>
@@ -1791,7 +1798,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
    </property>
    <property name="minimumSize">
     <size>
-     <width>100</width>
+     <width>0</width>
      <height>0</height>
     </size>
    </property>
