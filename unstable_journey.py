@@ -944,7 +944,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.stampnextButton.pressed.connect(self.next_stamp)
 
         # Menu options
-        self.actionNewImage.triggered.connect(self.canvas.initialize)
+        self.actionNewImage.triggered.connect(self.new_image)
         self.actionOpenImage.triggered.connect(self.open_file)
         self.actionSaveImage.triggered.connect(self.save_file)
         self.actionClearImage.triggered.connect(self.canvas.reset)
@@ -1023,6 +1023,10 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         else:
             clipboard.setPixmap(self.canvas.pixmap())
 
+    def new_image(self):
+        self.canvas.initialize()
+        self.canvas.symmetryActive = self.symmetryButton.isChecked()
+
     def open_file(self):
         """
         Open image file for editing, scaling the smaller dimension and cropping the remainder.
@@ -1058,9 +1062,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.canvas.setPixmap(pixmap)
 
     def randomizeSeed(self):
-        seedLineEdit = getattr(self, 'seedLineEdit')
         # based on https://www.reddit.com/r/StableDiffusion/comments/yiqeiy/silly_question_how_many_seeds_exist_in_stable/
-        seedLineEdit.setText(str(random.randint(0, sys.maxsize)))
+        self.seedLineEdit.setText(str(random.randint(0, sys.maxsize)))
 
     def hostOrPortChanged(self):
         self.api = webuiapi.WebUIApi(host=self.hostLineEdit.text(), port=int(self.portLineEdit.text()), use_https=self.use_https)
