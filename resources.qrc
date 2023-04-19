@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="icons">
+    <file alias="symmetry.png">icons/symmetry.png</file>
     <file alias="unstable_journey_logo.ico">icons/unstable_journey_logo.ico</file>
     <file alias="blue-folder-open-image.png">icons/blue-folder-open-image.png</file>
     <file alias="border-weight.png">icons/border-weight.png</file>

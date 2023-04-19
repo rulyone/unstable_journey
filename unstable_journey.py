@@ -155,6 +155,7 @@ class Canvas(QLabel):
         self.eraser_color.setAlpha(100)
         self.reset()
         self.threadpool = QThreadPool.globalInstance()
+        self.symmetryActive = False
 
     def reset(self):
         # Create the pixmap for display.
@@ -371,6 +372,9 @@ class Canvas(QLabel):
         
         if self.last_pos:
             pen_width = self.config['size']
+            if self.symmetryActive:
+                mirror_last_pos = QPoint(self.pixmap().width() - self.last_pos.x(), self.last_pos.y())
+                mirror_pos = QPoint(self.pixmap().width() - e.x(), e.y())
             if self.lastPressure is not None:
                  pen_width = pen_width * self.lastPressure
                 
@@ -378,6 +382,8 @@ class Canvas(QLabel):
             p = QPainter(pixmap_copy)
             p.setPen(QPen(self.active_color, pen_width, Qt.SolidLine, Qt.SquareCap, Qt.RoundJoin))
             p.drawLine(self.last_pos, e.pos())
+            if self.symmetryActive:
+                p.drawLine(mirror_last_pos, mirror_pos)
             p.end()
             self.setPixmap(pixmap_copy)
             self.update()
@@ -394,6 +400,9 @@ class Canvas(QLabel):
     def brush_mouseMoveEvent(self, e):
         if self.last_pos:
             pen_width = self.config['size']
+            if self.symmetryActive:
+                mirror_last_pos = QPoint(self.pixmap().width() - self.last_pos.x(), self.last_pos.y())
+                mirror_pos = QPoint(self.pixmap().width() - e.x(), e.y())
             if self.lastPressure is not None:
                  pen_width = pen_width * self.lastPressure
 
@@ -401,6 +410,8 @@ class Canvas(QLabel):
             p = QPainter(pixmap_copy)
             p.setPen(QPen(self.active_color, pen_width * BRUSH_MULT, Qt.SolidLine, Qt.RoundCap, Qt.RoundJoin))
             p.drawLine(self.last_pos, e.pos())
+            if self.symmetryActive:
+                p.drawLine(mirror_last_pos, mirror_pos)
             p.end()
             self.setPixmap(pixmap_copy)
             self.update()
@@ -417,6 +428,8 @@ class Canvas(QLabel):
     def spray_mouseMoveEvent(self, e):
         if self.last_pos:
             pen_width = self.config['size']
+            if self.symmetryActive:
+                mirror_pos = QPoint(self.pixmap().width() - e.x(), e.y())
             if self.lastPressure is not None:
                  pen_width = pen_width * self.lastPressure
                  
@@ -428,6 +441,8 @@ class Canvas(QLabel):
                 xo = random.gauss(0, self.config['size'] * SPRAY_PAINT_MULT)
                 yo = random.gauss(0, self.config['size'] * SPRAY_PAINT_MULT)
                 p.drawPoint(QPointF(e.x() + xo, e.y() + yo))
+                if self.symmetryActive:
+                    p.drawPoint(QPointF(mirror_pos.x() + xo, mirror_pos.y() + yo))
             p.end()
             self.setPixmap(pixmap_copy)
 
@@ -856,31 +871,25 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.cnSelectedModule = None
 
         # Setup the mode buttons
-        mode_group = QButtonGroup(self)
-        mode_group.setExclusive(True)
+        self.mode_group = QButtonGroup(self)
+        self.mode_group.setExclusive(True)
 
         for mode in MODES:
             btn = getattr(self, '%sButton' % mode)
             btn.pressed.connect(lambda mode=mode: self.canvas.set_mode(mode))
-            mode_group.addButton(btn)
+            self.mode_group.addButton(btn)
+
+        self.mode_group.buttonClicked.connect(self.mode_groupClicked)
 
         # Setup the SD inputs
-        convertSDButton = getattr(self, 'convertSDButton')
-        convertSDButton.clicked.connect(self.convertCanvasToSD)
+        self.convertSDButton.clicked.connect(self.convertCanvasToSD)
+        self.replaceSDButton.clicked.connect(self.replaceCanvasFromSD)
+        self.seedRandomizeButton.clicked.connect(self.randomizeSeed)
 
-        replaceSDButton = getattr(self, 'replaceSDButton')
-        replaceSDButton.clicked.connect(self.replaceCanvasFromSD)
-
-        seedRandomizeButton = getattr(self, 'seedRandomizeButton')
-        seedRandomizeButton.clicked.connect(self.randomizeSeed)
-
-        refreshModelButton = getattr(self, 'refreshModelButton')
-        refreshModelButton.clicked.connect(self.refreshModel)
-
+        self.refreshModelButton.clicked.connect(self.refreshModel)
         self.modelComboBox.currentTextChanged.connect(self.modelComboBoxChanged)
 
         self.refreshCNModelButton.clicked.connect(self.refreshCNModel)
-
         self.cnModelComboBox.currentTextChanged.connect(self.cnModelComboBoxChanged)
         self.cnPreComboBox.currentTextChanged.connect(self.cnPreComboBoxChanged)
 
@@ -890,6 +899,8 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.portLineEdit.textChanged.connect(self.hostOrPortChanged)
 
         self.httpsCheckBox.stateChanged.connect(self.httpsChanged)
+
+        self.symmetryButton.toggled.connect(self.symmetryToggled)
 
         # Setup the color selection buttons.
         self.primaryButton.pressed.connect(lambda: self.choose_color(self.set_primary_color))
@@ -1062,11 +1073,33 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.use_https = False
         self.api = webuiapi.WebUIApi(host=self.hostLineEdit.text(), port=int(self.portLineEdit.text()), use_https=self.use_https)
         self.cn_interface = webuiapi.ControlNetInterface(self.api)
+
+    def mode_groupClicked(self, info):
+        if info.objectName() not in ['brushButton', 'sprayButton', 'penButton'] and self.symmetryButton.isChecked():
+            msg = QMessageBox()
+            msg.setIconPixmap(QPixmap(':/icons/unstable_journey_logo.ico'))
+            msg.setText("Symmetry mode disabled")
+            msg.setInformativeText("Symmetry mode works only with Brush, Pen or Spray modes at the moment.")
+            msg.setWindowTitle("Info")
+            msg.exec()
+            self.symmetryButton.toggle()
         
+    def symmetryToggled(self, toggle):
+        if toggle:
+            #we can only use this mode when using the pen, brush or spray for now, lets validate we are using those
+            if self.canvas.mode not in ['brush', 'spray', 'pen']:
+                msg = QMessageBox()
+                msg.setIconPixmap(QPixmap(':/icons/unstable_journey_logo.ico'))
+                msg.setText("Symmetry mode unavailable")
+                msg.setInformativeText("Symmetry mode works only with Brush, Pen or Spray modes at the moment.")
+                msg.setWindowTitle("Info")
+                msg.exec()
+                self.symmetryButton.toggle()
+        self.canvas.symmetryActive = self.symmetryButton.isChecked()
 
     def showHelp(self):
         msg = QMessageBox()
-        msg.setIcon(QMessageBox.Information)
+        msg.setIconPixmap(QPixmap(':/icons/unstable_journey_logo.ico'))
         msg.setText("Help")
         msg.setInformativeText("""
         <!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0//EN" "http://www.w3.org/TR/REC-html40/strict.dtd">
