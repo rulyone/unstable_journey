@@ -18,6 +18,8 @@ Second, you need to modify webui-user.bat (Windows) or .sh (Linux) in the AUTOMA
 
 Third, you need to have **git** and **python 3** installed (haven't tested other versions).
 
+And Lastly, AUTOMATIC1111 webui is evolving every day and this application was tested against a specific version, so you might need to do `git checkout 22bcc7` in order for this to work.
+
 ## Install
 
 ```
@@ -33,6 +35,14 @@ python3 unstable_journey.py
 ```
 
 ## Troubleshooting and Questions
+
+This is a Python Desktop application written to work with AUTO1111 webui as a backend.
+
+Remember to start automatic1111 webui with the --api COMMANDLINE_ARGS in order to allow this application to work correctly. If the host is not your computer (friend with nice GPU or server), you can also add the --listen parameter (webui-user.bat or .sh).
+
+If you use ControlNet (CN), there's a bug in latest version, if it's not fixed yet, you will have to switch to a previous commit from the extension folder executing the following commands: git checkout c5403ce (c5403ced564e1042dcf2cf4acdd0967373b14343 hash).
+
+Just in case, the latest automatic1111 commit working with this application is 22bcc7, so you might need to do a `git checkout 22bcc7` (22bcc7be428c94e9408f589966c2040187245d81).
 
 Join the Discord server if you would like to contribute or have any questions
 
