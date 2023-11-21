@@ -18,7 +18,7 @@ Second, you need to modify webui-user.bat (Windows) or .sh (Linux) in the AUTOMA
 
 Third, you need to have **git** and **python 3** installed (haven't tested other versions).
 
-And Lastly, AUTOMATIC1111 webui is evolving every day and this application was tested against a specific version, so you might need to do `git checkout 22bcc7` in order for this to work.
+And Lastly, AUTOMATIC1111 webui is evolving every day and this application was tested against a specific version, so you might need to do `git checkout 22bcc7` inside the webui install folder in order for this to work.
 
 ## Install
 
